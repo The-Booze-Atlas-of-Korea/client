@@ -15,7 +15,11 @@ app.use(createPinia())
 app.use(router)
 app.use(PrimeVue, {
     theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+          // 다크 모드 완전히 비활성화 (항상 라이트 모드)
+          darkModeSelector: false,   // 또는 'none'
+        }
     }
 });
 
