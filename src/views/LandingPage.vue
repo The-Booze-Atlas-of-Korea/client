@@ -26,7 +26,7 @@
         <Button 
           class="text-white font-semibold px-8 py-3 rounded"
         >
-          시작하기
+          <RouterLink to="/login"> 시작하기 </RouterLink>
         </Button>
       </div>
     </main>
@@ -34,8 +34,13 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from 'primevue'
+import Button from 'primevue/button';
 import backgroundImage from '../assets/img/landingbackground.png'
 import LandingLoginHeader from '@/components/LandingLoginHeader.vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import LoginPage from './LoginPage.vue'
+
+const router = useRouter()
+const route = useRoute()
 
 </script>
