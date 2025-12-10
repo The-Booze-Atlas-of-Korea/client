@@ -33,8 +33,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
 import { Button } from 'primevue'
 import backgroundImage from '../assets/img/landingbackground.png'
 import LandingLoginHeader from '@/components/LandingLoginHeader.vue'

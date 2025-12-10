@@ -104,7 +104,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import LandingLoginHeader from '@/components/LandingLoginHeader.vue'
 import backgroundImage from '@/assets/img/login_background.png'
@@ -115,7 +115,7 @@ import Password from 'primevue/password'
 import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
 
-const loginId = ref('')
-const password = ref('')
-const rememberMe = ref(false)
+const loginId = ref<string>('')
+const password = ref<string>('')
+const rememberMe = ref<boolean>(false)
 </script>
