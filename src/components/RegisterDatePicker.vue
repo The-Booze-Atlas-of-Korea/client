@@ -16,7 +16,9 @@
       class="w-full"
       :maxDate="maxDate"
       @blur="touched = true"
-      showIcon fluid iconDisplay="input"
+      showIcon
+      fluid
+      iconDisplay="input"
     />
 
     <!-- 에러 메시지 -->
@@ -29,65 +31,62 @@
   </div>
 </template>
 
-<script setup>
-import { computed, ref, watch, onBeforeUnmount } from 'vue'
-import DatePicker  from 'primevue/datepicker'
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import DatePicker from 'primevue/datepicker'
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: '',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  validErrorMessage: {
-    type: String,
-    default: '',
-  },
-  isRequired: {
-    type: Boolean,
-    default: false,
-  },
-  maxDate: {
-    type: Date,
-    default: () => new Date(),
-  },
+type DateModel = Date | null
+
+interface RegisterDatePickerProps {
+  modelValue: DateModel
+  label?: string
+  placeholder?: string
+  validErrorMessage?: string
+  isRequired?: boolean
+  maxDate?: Date
+}
+
+const props = withDefaults(defineProps<RegisterDatePickerProps>(), {
+  modelValue: null,
+  label: '',
+  placeholder: '',
+  validErrorMessage: '',
+  isRequired: false,
+  maxDate: () => new Date(),
 })
 
-// 부모에 값 / 유효성 상태를 알려줄 이벤트
-const emit = defineEmits(['update:modelValue', 'validity-change'])
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: DateModel): void
+  (e: 'validity-change', value: boolean): void
+}>()
 
-const isValid = ref(true)
-const touched = ref(false)
+const isValid = ref<boolean>(true)
+const touched = ref<boolean>(false)
 
 // v-model 래퍼 (양방향 바인딩)
-const inputValue = computed({
-  get: () => props.modelValue ?? '',
-  set: (val) => {
+const inputValue = computed<DateModel>({
+  get: () => props.modelValue,
+  set: (val: DateModel) => {
     emit('update:modelValue', val)
   },
 })
 
 // 실제 검증 로직
-const validate = (value) => {
-    if (!props.isRequired) return true
-    return v.trim().length > 0
+const validate = (value: DateModel): boolean => {
+  if (!props.isRequired) return true
+  return value != null;
 }
 
-// modelValue가 변할 때마다 디바운스 검증
+// modelValue가 변할 때마다 검증 + validity-change emit
 watch(
   () => props.modelValue,
   (val) => {
-    validate(val)
+    const nextValid = validate(val)
+    isValid.value = nextValid
+    emit('validity-change', nextValid)
   },
+  { immediate: true },
 )
-
 </script>
 
 <style scoped>

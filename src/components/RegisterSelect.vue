@@ -16,7 +16,9 @@
       :options="options"
       class="w-full"
       @blur="touched = true"
-      showIcon fluid iconDisplay="input"
+      showIcon
+      fluid
+      iconDisplay="input"
     />
 
     <!-- 에러 메시지 -->
@@ -29,65 +31,62 @@
   </div>
 </template>
 
-<script setup>
-import { computed, ref, watch, onBeforeUnmount } from 'vue'
-import Select from 'primevue/select';
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import Select from 'primevue/select'
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: '',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  options: {
-    type: Array,
-    default: [],
-  },
-  validErrorMessage: {
-    type: String,
-    default: '',
-  },
-  isRequired: {
-    type: Boolean,
-    default: false,
-  },
+interface RegisterSelectProps {
+  modelValue: string
+  label?: string
+  placeholder?: string
+  options?: string[]
+  validErrorMessage?: string
+  isRequired?: boolean
+}
+
+const props = withDefaults(defineProps<RegisterSelectProps>(), {
+  modelValue: '',
+  label: '',
+  placeholder: '',
+  options: () => [],
+  validErrorMessage: '',
+  isRequired: false,
 })
 
-// 부모에 값 / 유효성 상태를 알려줄 이벤트
-const emit = defineEmits(['update:modelValue', 'validity-change'])
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+  (e: 'validity-change', value: boolean): void
+}>()
 
-const isValid = ref(true)
-const touched = ref(false)
+const isValid = ref<boolean>(true)
+const touched = ref<boolean>(false)
 
-// v-model 래퍼 (양방향 바인딩)
-const inputValue = computed({
+// v-model 래퍼
+const inputValue = computed<string>({
   get: () => props.modelValue ?? '',
-  set: (val) => {
+  set: (val: string) => {
     emit('update:modelValue', val)
   },
 })
 
 // 실제 검증 로직
-const validate = (value) => {
-    if (!props.isRequired) return true
-    return v.trim().length > 0
+const validate = (value: string): boolean => {
+  const v = (value ?? '').trim()
+
+  if (!props.isRequired) return true
+  return v.length > 0
 }
 
-// modelValue가 변할 때마다 디바운스 검증
+// modelValue가 변할 때마다 검증 + validity-change emit
 watch(
   () => props.modelValue,
   (val) => {
-    validate(val)
+    const nextValid = validate(val ?? '')
+    isValid.value = nextValid
+    emit('validity-change', nextValid)
   },
+  { immediate: true },
 )
-
 </script>
 
 <style scoped>

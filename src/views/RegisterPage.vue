@@ -124,7 +124,7 @@
               validErrorMessage="필수항목 입니다."
               :options="genderOptions"
               :isRequired="true"
-              @validity-change="val => (birthDayValid = val)"
+              @validity-change="val => (genderValid = val)"
               />
             </div>
 
@@ -152,7 +152,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import LandingLoginHeader from '@/components/LandingLoginHeader.vue'
 import backgroundImage from '@/assets/img/login_background.png'
@@ -165,32 +165,34 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
 
-const loginId = ref('')
-const password = ref('')
-const name = ref('')
-const email = ref('')
-const phone = ref('')
-const adress = ref('')
-const birthDay = ref('')
-const gender = ref('')
+const loginId = ref<string>('')
+const password = ref<string>('')
+const name = ref<string>('')
+const email = ref<string>('')
+const phone = ref<string>('')
+const adress = ref<string>('')
+const birthDay = ref<Date|null>(null)
+const gender = ref<string>('')
 
 
-const loginIdValid = ref(false);
-const passwordValid = ref(false); 
-const nameValid = ref(false); 
-const emailValid = ref(false); 
-const phoneValid = ref(false); 
-const adressValid = ref(false); 
-const birthDayValid = ref(false); 
-const genderValid = ref(false); 
+const loginIdValid = ref<boolean>(false);
+const passwordValid = ref<boolean>(false); 
+const nameValid = ref<boolean>(false); 
+const emailValid = ref<boolean>(false); 
+const phoneValid = ref<boolean>(false); 
+const adressValid = ref<boolean>(false); 
+const birthDayValid = ref<boolean>(false); 
+const genderValid = ref<boolean>(false); 
 
 const genderOptions = ["M", "F", "OTHER"]
 
 
 
-const passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[~!@#$%^&*()_+\\-=?{}\\[\\]\|:;\"'<>,./]).{8,20}$";
-const loginIdRegex = "^[a-z0-9]{4,20}$";
-const emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-const phoneRegex = "^01[016789]-?\d{3,4}-?\d{4}$";
+const passwordRegex: RegExp =
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#$%^&*()_+\-=?{}\[\]|:;"'<>,.\/]).{8,20}$/
+const loginIdRegex: RegExp = /^[a-z0-9]{4,20}$/
+const emailRegex: RegExp =
+  /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+const phoneRegex: RegExp = /^01[016789]-?\d{3,4}-?\d{4}$/
 
 </script>
