@@ -88,7 +88,9 @@
             <div class="flex justify-between text-xs md:text-sm text-gray-500 mb-6">
               <button class="hover:text-gray-900">비밀번호 찾기</button>
               <span class="text-gray-300">|</span>
-              <button class="hover:text-gray-900">회원가입</button>
+              <button class="hover:text-gray-900">
+                <RouterLink to="/register">회원가입</RouterLink>
+              </button>
             </div>
 
             <!-- 테스트 계정 -->
@@ -114,6 +116,7 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
+import { RouterLink } from 'vue-router'
 
 const loginId = ref<string>('')
 const password = ref<string>('')
