@@ -162,8 +162,10 @@ import Button from 'primevue/button'
 import { AuthController } from '@/api/AuthController'
 import { ApiResult } from '@/api/ApiResult'
 import { useRouter } from 'vue-router'
+import { useToast } from 'primevue'
 
 const router = useRouter()
+const toast = useToast()
 
 const loginId = ref<string>('')
 const password = ref<string>('')
@@ -235,6 +237,10 @@ const onSubmit = async () => {
     return
   }
 
+  toast.add({
+    severity: 'success',
+    summary: '회원가입 성공, 로그인 하세요.'
+  })
   router.push('/login')
 }
 </script>
