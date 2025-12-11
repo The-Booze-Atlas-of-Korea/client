@@ -222,6 +222,7 @@ const onSubmit = async () => {
     gender: gender.value,
     loginId: loginId.value,
     name: name.value,
+    email: email.value,
     password: password.value,
     phone: phone.value,
   })

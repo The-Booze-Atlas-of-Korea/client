@@ -17,6 +17,7 @@ export interface SignUpRequestDto {
   name: string;
   phone: string;
   address: string;
+  email: string;
   birthday: string;
   gender: string;
 }
