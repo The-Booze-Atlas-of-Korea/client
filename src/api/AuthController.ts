@@ -6,7 +6,7 @@ import httpClient, { ApiCall } from '@/api/HttpClient'
 
 
 // 실제로 백엔드 REST API와 통신하는 계층
-export const userController = {
+export const AuthController = {
   /*
 URL: /auth/login
 Method: POST
