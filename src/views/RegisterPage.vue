@@ -141,7 +141,9 @@
               icon="pi pi-arrow-right"
               iconPos="right"
               class="w-full mb-4 !bg-black !border-black hover:!bg-gray-900"
-            />
+            >
+              <RouterLink to="/login">로그인으로 돌아가기</RouterLink>
+            </Button>
           </section>
         </div>
       </div>
@@ -239,7 +241,7 @@ const onSubmit = async () => {
 
   toast.add({
     severity: 'success',
-    summary: '회원가입 성공, 로그인 하세요.'
+    summary: '회원가입 성공, 로그인 하세요.',
   })
   router.push('/login')
 }
