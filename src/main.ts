@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import { ToastService } from 'primevue'
 
+import 'primeicons/primeicons.css'
 
 const app = createApp(App)
 

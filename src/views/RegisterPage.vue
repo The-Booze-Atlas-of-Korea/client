@@ -121,9 +121,9 @@
             <!-- 가입 버튼 -->
             <Button
               label="회원가입"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              class="w-full mt-4 !bg-black !border-black hover:!bg-gray-900"
+              icon="pi pi-user-plus"
+              class="w-full mt-4"
+              severity="contrast"
               :loading="submitLoading"
               @click="onSubmit"
             />
@@ -138,11 +138,10 @@
             <!-- 돌아가기 버튼 -->
             <Button
               label="로그인으로 돌아가기"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              class="w-full mb-4 !bg-black !border-black hover:!bg-gray-900"
+              severity="secondary"
+              icon="pi pi-arrow-left"
+              class="w-full mb-4"
             >
-              <RouterLink to="/login">로그인으로 돌아가기</RouterLink>
             </Button>
           </section>
         </div>
