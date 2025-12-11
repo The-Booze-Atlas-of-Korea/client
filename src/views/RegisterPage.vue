@@ -141,6 +141,7 @@
               severity="secondary"
               icon="pi pi-arrow-left"
               class="w-full mb-4"
+              @click="onBack"
             >
             </Button>
           </section>
@@ -242,6 +243,10 @@ const onSubmit = async () => {
     severity: 'success',
     summary: '회원가입 성공, 로그인 하세요.',
   })
+  router.push('/login')
+}
+
+const onBack = () => {
   router.push('/login')
 }
 </script>
