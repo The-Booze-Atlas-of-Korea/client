@@ -7,7 +7,9 @@ import Aura from '@primeuix/themes/aura'
 
 import App from './App.vue'
 import router from './router'
+import { ToastService } from 'primevue'
 
+import 'primeicons/primeicons.css'
 
 const app = createApp(App)
 
@@ -60,5 +62,6 @@ app.use(PrimeVue, {
             // FileUpload, Pagination 등등도 필요하면 추가 가능
     },
 });
+app.use(ToastService)
 
 app.mount('#app')
