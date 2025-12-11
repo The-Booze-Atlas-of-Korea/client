@@ -60,9 +60,9 @@
             <!-- 로그인 버튼 -->
             <Button
               label="로그인"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              class="w-full mb-4 !bg-black !border-black hover:!bg-gray-900"
+              icon="pi pi-sign-in"
+              class="w-full mb-4"
+              severity="contrast"
               :loading="submitLoading"
               @click="onSubmit"
             />
@@ -75,9 +75,9 @@
             </p>
 
             <!-- 하단 링크 -->
-            <div class="flex justify-between text-xs md:text-sm text-gray-500 mb-6">
+            <div class="flex justify-center text-xs md:text-sm text-gray-500 mb-6">
               <button class="hover:text-gray-900">비밀번호 찾기</button>
-              <span class="text-gray-300">|</span>
+              <span class="text-gray-500 px-2.5">|</span>
               <button class="hover:text-gray-900">
                 <RouterLink to="/register">회원가입</RouterLink>
               </button>
@@ -132,7 +132,7 @@ const onSubmit = async () => {
     } else {
       errorMsg.value = '로그인 실패'
     }
-    submitLoading.value = false;
+    submitLoading.value = false
     return
   }
 
