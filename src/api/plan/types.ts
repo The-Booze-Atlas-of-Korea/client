@@ -1,61 +1,67 @@
 // Plan/Schedule/Calendar API Types
-// Minimal DTOs based on backend API contract
+// Minimal DTOs based on backend API contract (verified against master branch)
 
 /**
- * Spot (location) within a plan
+ * Spot (location/place) within a plan
+ * Backend: PlanSpotRequest.java
  */
-export interface Spot {
-  id?: number
-  name: string
-  address?: string
-  order: number
+export interface PlanSpot {
+  placeId?: number // nullable - 사용자가 직접 입력한 장소일 수 있음
+  placeNameSnapshot: string
+  placeAddressSnapshot?: string
+  latitude?: number
+  longitude?: number
+  sequence: number
+  memo?: string
 }
 
 /**
- * Plan entity
+ * Plan entity (응답)
  */
 export interface Plan {
-  id: number
-  title: string
+  planId?: number
+  title?: string
   description?: string
   theme?: string
-  budget?: number
-  spots: Spot[]
+  totalBudget?: number
+  spots?: PlanSpot[]
   createdAt?: string
   updatedAt?: string
 }
 
 /**
  * Request DTO for creating a plan
+ * Backend: CreatePlanRequest.java
  */
 export interface CreatePlanRequest {
   title: string
   description?: string
   theme?: string
-  budget?: number
-  spots: Omit<Spot, 'id'>[]
+  totalBudget?: number
+  spots?: Omit<PlanSpot, 'id'>[]
 }
 
 /**
- * Request DTO for updating a plan
+ * Request DTO for updating a plan (PATCH - 모든 필드 optional)
+ * Backend: UpdatePlanRequest.java
  */
 export interface UpdatePlanRequest {
   title?: string
   description?: string
   theme?: string
-  budget?: number
-  spots?: Omit<Spot, 'id'>[]
+  totalBudget?: number
+  spots?: Omit<PlanSpot, 'id'>[]
 }
 
 /**
  * Paginated plan list response
  */
 export interface PlanListResponse {
-  content: Plan[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
+  content?: Plan[]
+  page?: number
+  size?: number
+  totalElements?: number
+  totalPages?: number
 }
 
 /**
@@ -69,14 +75,13 @@ export interface VoteRequest {
  * Schedule entity
  */
 export interface Schedule {
-  id: number
-  planId: number
-  title: string
+  scheduleId?: number
+  planId?: number
+  title?: string
   type?: string
-  startAt: string
-  endAt: string
+  startAt?: string
+  endAt?: string
   reminders?: string[]
-  createdAt?: string
 }
 
 /**
@@ -95,31 +100,31 @@ export interface CreateScheduleRequest {
  * Schedule history item
  */
 export interface ScheduleHistoryItem {
-  id: number
+  scheduleId?: number
   planId?: number
-  title: string
-  startAt: string
-  endAt: string
+  title?: string
+  startAt?: string
+  endAt?: string
 }
 
 /**
  * Paginated schedule history response
  */
 export interface ScheduleHistoryResponse {
-  content: ScheduleHistoryItem[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
+  content?: ScheduleHistoryItem[]
+  page?: number
+  size?: number
+  totalElements?: number
+  totalPages?: number
 }
 
 /**
  * Calendar event representation
  */
 export interface CalendarEvent {
-  scheduleId: number
-  title: string
-  date: string
+  scheduleId?: number
+  title?: string
+  date?: string
   startAt?: string
   endAt?: string
   type?: string
@@ -129,29 +134,29 @@ export interface CalendarEvent {
  * Monthly calendar response
  */
 export interface MonthlyCalendar {
-  year: number
-  month: number
-  events: CalendarEvent[]
+  year?: number
+  month?: number
+  events?: CalendarEvent[]
 }
 
 /**
  * Daily calendar response
  */
 export interface DailyCalendar {
-  date: string
-  events: CalendarEvent[]
+  date?: string
+  events?: CalendarEvent[]
 }
 
 /**
  * Event detail response
  */
 export interface EventDetail {
-  scheduleId: number
+  scheduleId?: number
   planId?: number
-  title: string
+  title?: string
   description?: string
-  startAt: string
-  endAt: string
+  startAt?: string
+  endAt?: string
   type?: string
-  spots?: Spot[]
+  spots?: PlanSpot[]
 }
