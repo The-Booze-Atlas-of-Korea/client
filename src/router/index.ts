@@ -2,8 +2,8 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import RegisterPage from '@/views/RegisterPage.vue'
-import MainPage from '@/views/MainPage.vue'
- import PlansListPage from '@/views/PlansListPage.vue' // TODO: 백엔드 listPlans 엔드포인트 추가 후 활성화
+import HomePage from '@/views/HomePage.vue'
+import PlansListPage from '@/views/PlansListPage.vue' // TODO: 백엔드 listPlans 엔드포인트 추가 후 활성화
 import PlanFormPage from '@/views/PlanFormPage.vue'
 import PlanDetailPage from '@/views/PlanDetailPage.vue'
 import ScheduleCreatePage from '@/views/ScheduleCreatePage.vue'
@@ -27,9 +27,9 @@ const routes: RouteRecordRaw[] = [
     component: RegisterPage,
   },
   {
-    path: '/main',
-    name: 'MainPage',
-    component: MainPage,
+    path: '/home',
+    name: 'HomePage',
+    component: HomePage,
   },
   //플랜 관련 라우트 (Issue #27)
   {

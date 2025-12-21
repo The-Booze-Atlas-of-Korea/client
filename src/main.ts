@@ -10,6 +10,7 @@ import router from './router'
 import { ToastService } from 'primevue'
 
 import 'primeicons/primeicons.css'
+import { createNaverMap } from 'vue3-naver-maps'
 
 const app = createApp(App)
 
@@ -63,5 +64,12 @@ app.use(PrimeVue, {
     },
 });
 app.use(ToastService)
+//map VITE_MAP_API_CLIENT_ID
+app.use(createNaverMap, {
+  clientId: import.meta.env.VITE_MAP_API_CLIENT_ID, // Required
+  enableAiMaps: false, // Optional, 기본값 true
+  category: 'ncp', // Optional
+  subModules: [], // Optional, "panorama" | "geocoder" | "drawing" | "visualization"
+})
 
 app.mount('#app')
