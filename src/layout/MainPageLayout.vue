@@ -10,9 +10,7 @@ import InputText from 'primevue/inputtext'
 const route = useRoute()
 const mobileOpen = ref(false)
 
-const items = [
-  { label: 'Home', icon: 'pi pi-home', to: '/home' },
-]
+const items = [{ label: 'Home', icon: 'pi pi-home', to: '/home' }]
 
 const isActive = (to: string) => route.path === to || route.path.startsWith(to + '/')
 </script>
@@ -34,14 +32,10 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
       </div>
     </header>
 
-    <div class="flex">
+    <div class="flex flex-1 min-h-0">
       <!-- 데스크톱 사이드바 -->
       <aside
-        class="hidden md:flex
-        flex-col w-20
-        shrink-0 sticky top-4 h-[calc(100vh-2rem)]
-        bg-white/90 border border-slate-200
-        rounded-2xl shadow-lg overflow-hidden m-4"
+        class="hidden md:flex flex-col w-20 shrink-0 sticky top-4 h-[calc(100vh-2rem)] bg-white/90 border border-slate-200 rounded-2xl shadow-lg overflow-hidden m-4"
       >
         <!-- 로고 -->
         <div class="flex items-center justify-center h-16">
@@ -110,7 +104,7 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
       </Sidebar>
 
       <!-- 컨텐츠 -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 min-h-0 p-6 flex flex-col">
         <slot />
       </main>
     </div>

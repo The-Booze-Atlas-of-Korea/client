@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import RegisterPage from '@/views/RegisterPage.vue'
-import MainPage from '@/views/MainPage.vue'
+import HomePage from '@/views/HomePage.vue'
 
 
 const routes: RouteRecordRaw[] = [
@@ -22,9 +22,9 @@ const routes: RouteRecordRaw[] = [
     component: RegisterPage,
   },
   {
-    path: '/register',
-    name: 'MainPage',
-    component: MainPage,
+    path: '/home',
+    name: 'HomePage',
+    component: HomePage,
   },
 ]
 
