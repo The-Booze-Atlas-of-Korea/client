@@ -16,7 +16,7 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50">
+  <div class="h-screen min-h-0 bg-slate-50 flex flex-col">
     <!-- 모바일 상단바 -->
     <header class="md:hidden sticky top-0 z-50 bg-white border-b">
       <div class="flex items-center gap-3 px-4 py-3">
@@ -32,7 +32,7 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
       </div>
     </header>
 
-    <div class="flex flex-1 min-h-0">
+    <div class="flex-1 min-h-0 flex">
       <!-- 데스크톱 사이드바 -->
       <aside
         class="hidden md:flex flex-col w-20 shrink-0 sticky top-4 h-[calc(100vh-2rem)] bg-white/90 border border-slate-200 rounded-2xl shadow-lg overflow-hidden m-4"
@@ -104,7 +104,7 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
       </Sidebar>
 
       <!-- 컨텐츠 -->
-      <main class="flex-1 min-h-0 p-6 flex flex-col">
+      <main class="flex-1 min-h-0 p-6 flex flex-col overflow-hidden">
         <slot />
       </main>
     </div>
