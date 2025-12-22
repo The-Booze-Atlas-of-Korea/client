@@ -43,7 +43,9 @@ const getCenter = () => {
   return { lat, lng }
 }
 
+let reqSeq = 0
 const findNearbyBars = async (lat: number, lng: number) => {
+  const mySeq = ++reqSeq
   isLoading.value = true
   const res = await BarController.nearby({
     latitude: lat,
@@ -52,9 +54,9 @@ const findNearbyBars = async (lat: number, lng: number) => {
     count: 30,
     keyword: keyword.value,
     sort: 'distance',
-    radiusMeters: 1000,
+    radiusMeters: 2000,
   })
-
+  if (mySeq !== reqSeq) return
   isLoading.value = false
 
   if (ApiResult.isFail(res)) {
@@ -63,8 +65,7 @@ const findNearbyBars = async (lat: number, lng: number) => {
   }
 
   bars.value = res.data ?? []
-  // 첫 항목 자동 선택(원치 않으면 제거)
-  selectedBarId.value = bars.value[0]?.id ?? null
+  map.value?.refresh?.(true)
 }
 
 const searchHere = async () => {
@@ -88,15 +89,6 @@ const selectBar = (bar: BarListItemDto) => {
   } else {
     // fallback
     mapOptions.value = { ...mapOptions.value, latitude: bar.latitude, longitude: bar.longitude }
-  }
-}
-
-const markerHtmlIcon = (bar: BarListItemDto) => {
-  const selected = (bar.id ?? null) === selectedBarId.value
-  const size = selected ? 58 : 42
-  return {
-    size: { width: size, height: size },
-    anchor: { x: size / 2, y: size }, // 핀 아래가 좌표를 찍는 느낌
   }
 }
 
