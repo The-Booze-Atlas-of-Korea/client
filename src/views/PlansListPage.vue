@@ -131,7 +131,12 @@ const loadPlans = async () => {
   const res = await PlanApi.listPlans()
 
   if (res.ok) {
+    console.log('📋 Plans API Response:', res.data)
     plans.value = normalizePlans(res.data)
+    console.log('📋 Normalized plans:', plans.value)
+    if (plans.value.length > 0) {
+      console.log('📋 First plan structure:', plans.value[0])
+    }
   } else {
     errorMessage.value = res.error.message || '플랜 목록을 불러오는데 실패했습니다.'
   }
@@ -141,6 +146,11 @@ const loadPlans = async () => {
 
 // 네비게이션
 const navigateToPlanDetail = (planId: number) => {
+  console.log('🔍 navigateToPlanDetail called with planId:', planId)
+  if (!planId) {
+    console.error('❌ planId is undefined or null!')
+    return
+  }
   router.push(`/plans/${planId}`)
 }
 
