@@ -8,6 +8,7 @@ import Aura from '@primeuix/themes/aura'
 import App from './App.vue'
 import router from './router'
 import { ToastService, ConfirmationService } from 'primevue'
+import Tooltip from 'primevue/tooltip'
 
 import 'primeicons/primeicons.css'
 import { createNaverMap } from 'vue3-naver-maps'
@@ -65,6 +66,7 @@ app.use(PrimeVue, {
 });
 app.use(ToastService)
 app.use(ConfirmationService)
+app.directive('tooltip', Tooltip)
 //map VITE_MAP_API_CLIENT_ID
 app.use(createNaverMap, {
   clientId: import.meta.env.VITE_MAP_API_CLIENT_ID, // Required
