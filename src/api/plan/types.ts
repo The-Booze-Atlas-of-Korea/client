@@ -52,7 +52,7 @@ export interface UpdatePlanRequest {
   description?: string
   theme?: string
   totalBudget?: number
-  spots?: Omit<PlanSpot, 'id'>[]
+  spots?: Omit<PlanSpot, 'id'>[] | null
 }
 
 /**
