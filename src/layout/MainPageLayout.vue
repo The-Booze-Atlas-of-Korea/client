@@ -133,7 +133,7 @@ const createNewPlan = () => {
       </Sidebar>
 
       <!-- 컨텐츠 -->
-      <main class="flex-1 min-h-0 p-6 flex flex-col overflow-hidden">
+      <main class="flex-1 min-h-0 p-6 flex flex-col overflow-auto">
         <slot />
       </main>
     </div>
