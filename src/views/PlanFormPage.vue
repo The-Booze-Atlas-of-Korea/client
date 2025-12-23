@@ -322,10 +322,10 @@ const handleSubmit = async () => {
       // 수정 모드
       const payload: UpdatePlanRequest = {
         title: formData.value.title,
-        description: formData.value.description || undefined,
-        theme: formData.value.theme || undefined,
-        totalBudget: formData.value.totalBudget || undefined,
-        spots: formData.value.spots.length > 0 ? formData.value.spots : undefined,
+        description: formData.value.description?.trim() || '',
+        theme: formData.value.theme?.trim() || '',
+        totalBudget: formData.value.totalBudget || 0,
+        spots: formData.value.spots,
       }
 
       const res = await PlanApi.updatePlan(planId.value, payload)
