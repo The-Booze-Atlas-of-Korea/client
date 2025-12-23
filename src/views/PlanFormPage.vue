@@ -1,6 +1,6 @@
 <template>
   <MainPageLayout>
-  <div class="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
+  <div class="flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50 min-h-full">
     <!-- 헤더 -->
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -246,6 +246,8 @@ const addSpot = () => {
   formData.value.spots.push({
     placeNameSnapshot: '',
     placeAddressSnapshot: '',
+    latitude: 0, // 기본값 설정 (DB NOT NULL 제약 대응)
+    longitude: 0, // 기본값 설정
     memo: '',
     sequence: formData.value.spots.length, // 자동 할당
   })
