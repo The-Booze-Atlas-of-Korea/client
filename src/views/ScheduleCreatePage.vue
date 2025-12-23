@@ -1,4 +1,5 @@
 <template>
+  <MainPageLayout>
   <div class="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
     <!-- 헤더 -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -133,6 +134,7 @@
       </div>
     </main>
   </div>
+  </MainPageLayout>
 </template>
 
 <script setup lang="ts">
@@ -147,6 +149,7 @@ import Dropdown from 'primevue/dropdown'
 import { PlanApi } from '@/api/plan/planApi'
 import { ScheduleApi } from '@/api/plan/scheduleApi'
 import type { Plan, CreateScheduleRequest } from '@/api/plan/types'
+import MainPageLayout from '@/layout/MainPageLayout.vue'
 
 const router = useRouter()
 const route = useRoute()

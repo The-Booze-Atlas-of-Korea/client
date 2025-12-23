@@ -1,4 +1,5 @@
 <template>
+  <MainPageLayout>
   <div class="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
     <!-- 헤더 -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -96,6 +97,7 @@
       </div>
     </main>
   </div>
+  </MainPageLayout>
 </template>
 
 <script setup lang="ts">
@@ -105,6 +107,7 @@ import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import { PlanApi } from '@/api/plan/planApi'
 import type { Plan } from '@/api/plan/types'
+import MainPageLayout from '@/layout/MainPageLayout.vue'
 
 const router = useRouter()
 

@@ -1,4 +1,5 @@
 <template>
+  <MainPageLayout>
   <div class="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
     <!-- 헤더 -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -187,6 +188,7 @@
       </div>
     </main>
   </div>
+  </MainPageLayout>
 </template>
 
 <script setup lang="ts">
@@ -199,6 +201,7 @@ import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import { PlanApi } from '@/api/plan/planApi'
 import type { CreatePlanRequest, UpdatePlanRequest, PlanSpot } from '@/api/plan/types'
+import MainPageLayout from '@/layout/MainPageLayout.vue'
 
 const router = useRouter()
 const route = useRoute()
