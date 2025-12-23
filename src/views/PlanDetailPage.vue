@@ -173,7 +173,7 @@
 
 <script setup lang="ts">
 // TODO: 라우터 등록 후 /plans/:planId 경로 확인
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Button from 'primevue/button'
 import ConfirmDialog from 'primevue/confirmdialog'
@@ -186,10 +186,11 @@ const router = useRouter()
 const route = useRoute()
 const confirm = useConfirm()
 
-// planId 추출
-const planId = computed(() => {
-  const id = route.params.planId
-  return id ? Number(id) : null
+// planId 추출 (NaN-safe)
+const planId = computed<number | null>(() => {
+  const raw = route.params.planId
+  const n = Number(raw)
+  return Number.isFinite(n) ? n : null
 })
 
 // 상태 관리
@@ -292,10 +293,14 @@ const deletePlan = async () => {
   deleting.value = false
 }
 
-// 컴포넌트 마운트
-onMounted(() => {
-  loadPlanDetail()
-})
+// route 파라미터 변경 감지 (최초 로드 포함)
+watch(
+  () => route.params.planId,
+  () => {
+    loadPlanDetail()
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
