@@ -34,14 +34,14 @@ export const PlanApi = {
 
   /**
    * Update an existing plan
-   * PATCH /plans/{planId}
+   * PUT /plans/{planId}
    */
   async updatePlan(
     planId: number,
     payload: UpdatePlanRequest,
   ): Promise<ApiResult<Plan>> {
     const res = await ApiCall<Plan>(() =>
-      httpClient.patch(`/plans/${planId}`, payload),
+      httpClient.put(`/plans/${planId}`, payload),
     )
     return handleUnauthorized(res)
   },
