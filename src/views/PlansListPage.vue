@@ -50,9 +50,9 @@
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="plan in plans"
-          :key="plan.planId"
+          :key="plan.id || plan.planId"
           class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer transform hover:-translate-y-1"
-          @click="navigateToPlanDetail(plan.planId!)"
+          @click="navigateToPlanDetail(plan.id || plan.planId!)"
         >
           <div class="p-6">
             <!-- 테마 배지 -->
@@ -131,12 +131,7 @@ const loadPlans = async () => {
   const res = await PlanApi.listPlans()
 
   if (res.ok) {
-    console.log('📋 Plans API Response:', res.data)
     plans.value = normalizePlans(res.data)
-    console.log('📋 Normalized plans:', plans.value)
-    if (plans.value.length > 0) {
-      console.log('📋 First plan structure:', plans.value[0])
-    }
   } else {
     errorMessage.value = res.error.message || '플랜 목록을 불러오는데 실패했습니다.'
   }
@@ -146,11 +141,6 @@ const loadPlans = async () => {
 
 // 네비게이션
 const navigateToPlanDetail = (planId: number) => {
-  console.log('🔍 navigateToPlanDetail called with planId:', planId)
-  if (!planId) {
-    console.error('❌ planId is undefined or null!')
-    return
-  }
   router.push(`/plans/${planId}`)
 }
 
