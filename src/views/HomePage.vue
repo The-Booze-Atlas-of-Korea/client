@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import MainPageLayout from '@/layout/MainPageLayout.vue'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { NaverMap, NaverMarker } from 'vue3-naver-maps'
 import { useToast } from 'primevue'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import ScrollPanel from 'primevue/scrollpanel'
+import Dialog from 'primevue/dialog'
 
 import { BarController } from '@/api/BarController'
 import { ApiResult } from '@/api/ApiResult'
 import type { BarListItemDto } from '@/api/responses/BarListItemDto'
+import { PlanApi } from '@/api/plan/planApi'
+import type { Plan, PlanSpot } from '@/api/plan/types'
 import BarMarkerImg from '@/assets/img/bar_marker.png'
 
 const toast = useToast()
@@ -20,6 +23,12 @@ const selectedBarId = ref<number | null>(null)
 
 const keyword = ref('')
 const isLoading = ref(false)
+
+// 플랜 관련 상태
+const showPlanDialog = ref(false)
+const selectedBarForAdd = ref<BarListItemDto | null>(null)
+const userPlans = ref<Plan[]>([])
+const addingToPlan = ref(false)
 
 const mapOptions = ref({
   latitude: 36.35044,
@@ -95,6 +104,78 @@ const selectBar = (bar: BarListItemDto) => {
 const selectedBar = computed(
   () => bars.value.find((b) => (b.id ?? null) === selectedBarId.value) ?? null,
 )
+
+// 플랜 목록 로드
+const loadUserPlans = async () => {
+  const res = await PlanApi.listPlans()
+  if (res.ok) {
+    const data = res.data as any
+    userPlans.value = Array.isArray(data) ? data : (data?.content || [])
+  } else {
+    errToast('플랜 목록 조회 실패', res.error.message || '')
+  }
+}
+
+// 플랜에 추가 다이얼로그 열기
+const openPlanDialog = async (bar: BarListItemDto) => {
+  selectedBarForAdd.value = bar
+  await loadUserPlans()
+  showPlanDialog.value = true
+}
+
+// 플랜에 장소 추가
+const addBarToPlan = async (planId: number) => {
+  if (!selectedBarForAdd.value) return
+
+  addingToPlan.value = true
+
+  try {
+    // 기존 플랜 데이터 조회
+    const planRes = await PlanApi.getPlanDetail(planId)
+    if (!planRes.ok) {
+      errToast('플랜 조회 실패', planRes.error.message || '')
+      return
+    }
+
+    const plan = planRes.data
+    const existingSpots = plan.spots || []
+
+    // 새 spot 생성
+    const newSpot: PlanSpot = {
+      placeId: selectedBarForAdd.value.id,
+      placeNameSnapshot: selectedBarForAdd.value.name,
+      placeAddressSnapshot: selectedBarForAdd.value.address,
+      latitude: selectedBarForAdd.value.latitude,
+      longitude: selectedBarForAdd.value.longitude,
+      sequence: existingSpots.length + 1,
+      memo: '',
+    }
+
+    // PUT 요청으로 업데이트
+    const updateRes = await PlanApi.updatePlan(planId, {
+      spots: [...existingSpots, newSpot],
+    })
+
+    if (updateRes.ok) {
+      toast.add({
+        severity: 'success',
+        summary: '플랜에 추가되었습니다',
+        detail: `"${selectedBarForAdd.value.name}"이(가) "${plan.title}"에 추가되었습니다.`,
+        life: 3000,
+      })
+      showPlanDialog.value = false
+    } else {
+      errToast('플랜 추가 실패', updateRes.error.message || '')
+    }
+  } finally {
+    addingToPlan.value = false
+  }
+}
+
+// 컴포넌트 마운트 시 플랜 목록 미리 로드 (선택 사항)
+onMounted(() => {
+  loadUserPlans()
+})
 </script>
 
 <template>
@@ -161,8 +242,17 @@ const selectedBar = computed(
           </ul>
         </ScrollPanel>
 
-        <div v-if="selectedBar" class="p-3 border-t border-gray-100 text-xs text-gray-600">
-          선택됨: <span class="font-semibold text-gray-800">{{ selectedBar.name }}</span>
+        <div v-if="selectedBar" class="p-3 border-t border-gray-100">
+          <div class="text-xs text-gray-600 mb-2">
+            선택됨: <span class="font-semibold text-gray-800">{{ selectedBar.name }}</span>
+          </div>
+          <Button
+            label="플랜에 추가"
+            icon="pi pi-plus"
+            class="w-full"
+            severity="contrast"
+            @click="openPlanDialog(selectedBar)"
+          />
         </div>
       </aside>
 
@@ -196,5 +286,57 @@ const selectedBar = computed(
         </naver-map>
       </section>
     </div>
+
+    <!-- 플랜 선택 다이얼로그 -->
+    <Dialog
+      v-model:visible="showPlanDialog"
+      header="플랜에 추가"
+      :modal="true"
+      :style="{ width: '90vw', maxWidth: '500px' }"
+    >
+      <div v-if="selectedBarForAdd" class="mb-4">
+        <div class="text-sm text-gray-600">추가할 장소:</div>
+        <div class="font-semibold text-lg">{{ selectedBarForAdd.name }}</div>
+        <div class="text-xs text-gray-500">{{ selectedBarForAdd.address }}</div>
+      </div>
+
+      <div v-if="userPlans.length === 0" class="text-center py-6 text-gray-500">
+        <i class="pi pi-inbox text-4xl mb-3"></i>
+        <div>플랜이 없습니다.</div>
+        <div class="text-xs">먼저 플랜을 생성해주세요.</div>
+      </div>
+
+      <div v-else class="space-y-2 max-h-[60vh] overflow-y-auto">
+        <div
+          v-for="plan in userPlans"
+          :key="plan.id || plan.planId"
+          class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition"
+          @click="addBarToPlan(plan.id || plan.planId!)"
+        >
+          <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">{{ plan.title || '제목 없음' }}</div>
+              <div class="text-xs text-gray-600 truncate">{{ plan.description }}</div>
+              <div class="flex items-center gap-2 mt-1">
+                <span v-if="plan.theme" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                  {{ plan.theme }}
+                </span>
+                <span class="text-xs text-gray-500">{{ plan.spots?.length || 0 }}개 장소</span>
+              </div>
+            </div>
+            <i class="pi pi-angle-right text-gray-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button
+          label="취소"
+          severity="secondary"
+          outlined
+          @click="showPlanDialog = false"
+        />
+      </template>
+    </Dialog>
   </MainPageLayout>
 </template>

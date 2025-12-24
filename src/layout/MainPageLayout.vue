@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import Sidebar from 'primevue/sidebar'
 import Button from 'primevue/button'
@@ -8,11 +8,21 @@ import Avatar from 'primevue/avatar'
 import InputText from 'primevue/inputtext'
 
 const route = useRoute()
+const router = useRouter()
 const mobileOpen = ref(false)
 
-const items = [{ label: 'Home', icon: 'pi pi-home', to: '/home' }]
+const items = [
+  { label: 'Home', icon: 'pi pi-home', to: '/home' },
+  { label: 'Plans', icon: 'pi pi-list', to: '/plans' },
+  // { label: 'Calendar', icon: 'pi pi-calendar', to: '/calendar' }, // TODO: CalendarPage 추가 후 활성화
+  { label: 'History', icon: 'pi pi-history', to: '/history' },
+]
 
 const isActive = (to: string) => route.path === to || route.path.startsWith(to + '/')
+
+const createNewPlan = () => {
+  router.push('/plans/new')
+}
 </script>
 
 <template>
@@ -44,6 +54,17 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
           >
             <i class="pi pi-box text-lg"></i>
           </div>
+        </div>
+
+        <!-- 플랜 생성 버튼 -->
+        <div class="px-3 pt-2">
+          <button
+            @click="createNewPlan"
+            class="w-full h-11 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 transition-all flex items-center justify-center gap-2"
+            v-tooltip.right="'새 플랜 만들기'"
+          >
+            <i class="pi pi-plus text-lg"></i>
+          </button>
         </div>
 
         <!-- 아이콘 메뉴 -->
@@ -86,6 +107,14 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
           <Button class="ml-auto" icon="pi pi-times" text rounded @click="mobileOpen = false" />
         </div>
 
+        <!-- 플랜 생성 버튼 (모바일) -->
+        <Button
+          label="새 플랜 만들기"
+          icon="pi pi-plus"
+          class="w-full mb-4 bg-gradient-to-r from-green-500 to-emerald-600 border-none"
+          @click="createNewPlan(); mobileOpen = false"
+        />
+
         <div class="flex flex-col gap-1">
           <RouterLink
             v-for="item in items"
@@ -104,7 +133,7 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
       </Sidebar>
 
       <!-- 컨텐츠 -->
-      <main class="flex-1 min-h-0 p-6 flex flex-col overflow-hidden">
+      <main class="flex-1 min-h-0 p-6 flex flex-col overflow-auto">
         <slot />
       </main>
     </div>

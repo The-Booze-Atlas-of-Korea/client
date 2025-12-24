@@ -17,9 +17,11 @@ export interface PlanSpot {
 
 /**
  * Plan entity (응답)
+ * 백엔드는 id를 반환하지만, 일부 API는 planId를 사용할 수 있음
  */
 export interface Plan {
-  planId?: number
+  id?: number // 백엔드 응답 필드
+  planId?: number // 일부 API에서 사용
   title?: string
   description?: string
   theme?: string
@@ -50,7 +52,7 @@ export interface UpdatePlanRequest {
   description?: string
   theme?: string
   totalBudget?: number
-  spots?: Omit<PlanSpot, 'id'>[]
+  spots?: Omit<PlanSpot, 'id'>[] | null
 }
 
 /**
