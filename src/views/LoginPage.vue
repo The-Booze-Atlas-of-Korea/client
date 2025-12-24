@@ -136,6 +136,6 @@ const onSubmit = async () => {
     return
   }
 
-  await router.push('/main')
+  await router.push('/home')
 }
 </script>

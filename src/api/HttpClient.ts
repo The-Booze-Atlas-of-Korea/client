@@ -3,9 +3,9 @@ import { ApiError, ApiResult } from '@/api/ApiResult'
 
 const httpClient = axios.create({
   baseURL: 'http://localhost:8888/api', // 백엔드 주소 (예: Spring Boot)
-  timeout: 5000,
+  timeout: 180_000,
   withCredentials: true, // 세션/쿠키 쓰면 true
-});
+})
 
 export default httpClient
 
