@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainPageLayout from '@/layout/MainPageLayout.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { NaverMap, NaverMarker } from 'vue3-naver-maps'
 import { useToast } from 'primevue'
 import InputText from 'primevue/inputtext'
@@ -56,6 +56,50 @@ const errToast = (summary: string, detail: string) => {
   toast.add({ severity: 'error', summary, detail, life: 3500 })
 }
 
+// 마커 렌더 토글(핵심)
+const renderMarkers = ref(true)
+
+// bars를 안전하게 교체: 마커 언마운트 -> bars 교체 -> 마커 마운트
+const setBarsSafely = async (nextBars: BarListItemDto[]) => {
+  // 1) 다이얼로그가 닫히도록 먼저 한 틱 렌더 기회를 줌
+  await nextTick()
+
+  // 2) 마커 먼저 내리기(언마운트)
+  renderMarkers.value = false
+  await nextTick()
+
+  // 3) 데이터 교체
+  bars.value = nextBars
+  selectedBarId.value = nextBars[0]?.id ?? null
+
+  await nextTick()
+
+  // 4) 마커 다시 올리기(마운트)
+  renderMarkers.value = true
+  await nextTick()
+
+  await refreshMapLayout()
+}
+
+const triggerMapResize = () => {
+  const m = map.value
+  if (!m) return
+
+  const naverAny = (window as any).naver
+  naverAny?.maps?.Event?.trigger?.(m, 'resize') // ✅ 네이버맵 리사이즈 트리거
+  naverAny?.maps?.refresh?.(true)
+}
+
+// 레이아웃/데이터 변경 직후에 안전하게 리페인트
+const refreshMapLayout = async () => {
+  await nextTick()
+  requestAnimationFrame(() => {
+    triggerMapResize()
+    // flex 레이아웃 갱신 직후 한 번 더(경험상 이게 효과 큼)
+    setTimeout(triggerMapResize, 0)
+  })
+}
+
 const getCenter = () => {
   const center = map.value?.getCenter?.()
   // naver.maps.LatLng 형태면 lat()/lng()가 있음
@@ -85,8 +129,7 @@ const findNearbyBars = async (lat: number, lng: number) => {
     return
   }
 
-  bars.value = res.data ?? []
-  map.value?.refresh?.(true)
+  await setBarsSafely(res.data ?? [])
 }
 
 const searchHere = async () => {
@@ -255,8 +298,11 @@ const runAiRecommend = async () => {
     return
   }
 
+  showAiDialog.value = false
+  await nextTick()
+
   // ✅ 여기서 bars를 AI 결과로 교체 → 리스트/마커가 같이 갱신됨
-  bars.value = items.map((i) => ({
+  const results = items.map((i) => ({
     // BarListItemDto에 필요한 최소 필드들(구조적 타이핑이라 추가 필드 붙여도 OK)
     id: i.id,
     name: i.name,
@@ -273,13 +319,8 @@ const runAiRecommend = async () => {
     // openInformation: i.openInformation ?? '',
   })) as MapBarItem[]
 
-  selectedBarId.value = bars.value[0]?.id ?? null
-  showAiDialog.value = false
+  await setBarsSafely(results ?? [])
 
-  // 첫 번째 추천으로 지도 센터 이동(선택)
-  if (bars.value[0]) selectBar(bars.value[0])
-
-  map.value?.refresh?.(true)
   toast.add({
     severity: 'success',
     summary: 'AI 추천 완료',
@@ -299,14 +340,14 @@ onMounted(() => {
     <div class="h-full min-h-0 flex flex-col md:flex-row gap-3">
       <!-- 사이드 패널 -->
       <aside
-        class="md:w-[360px] w-full shrink-0 border border-gray-200 rounded-lg bg-white min-h-[260px] md:min-h-0"
+        class="md:w-[360px] w-full shrink-0 border border-gray-200 rounded-lg bg-white min-h-[260px] md:min-h-0 flex flex-col overflow-hidden"
       >
-        <div class="p-3 border-b border-gray-100 flex items-center gap-2">
+        <div class="p-3 border-b border-gray-100 flex items-center gap-2 shrink-0">
           <span class="font-semibold">근처 술집</span>
           <span class="text-xs text-gray-500">({{ bars.length }})</span>
         </div>
 
-        <div class="p-3 flex gap-1">
+        <div class="p-3 flex gap-1 shrink-0">
           <InputText
             v-model="keyword"
             placeholder="키워드 (상호/카테고리 등)"
@@ -316,7 +357,7 @@ onMounted(() => {
           <Button :loading="isLoading" label="검색" @click="searchHere" />
         </div>
 
-        <div class="px-3 pb-3">
+        <div class="px-3 pb-3 shrink-0">
           <Button
             :loading="isLoading"
             icon="pi pi-map-marker"
@@ -327,7 +368,7 @@ onMounted(() => {
           />
         </div>
 
-        <div class="px-3 pb-3">
+        <div class="px-3 pb-3 shrink-0">
           <Button
             :loading="isLoading || aiLoading"
             icon="pi pi-star"
@@ -338,7 +379,7 @@ onMounted(() => {
           />
         </div>
 
-        <ScrollPanel style="height: calc(100% - 208px)" class="px-3 pb-3">
+        <ScrollPanel class="px-3 pb-3 flex-1 min-h-0">
           <div v-if="isLoading" class="text-sm text-gray-500 py-6 text-center">불러오는 중...</div>
 
           <div v-else-if="bars.length === 0" class="text-sm text-gray-500 py-10 text-center">
@@ -347,8 +388,8 @@ onMounted(() => {
 
           <ul v-else class="space-y-2">
             <li
-              v-for="bar in bars"
-              :key="bar.id ?? `${bar.latitude}-${bar.longitude}`"
+              v-for="(bar, idx) in bars"
+              :key="bar.id ?? `${bar.latitude}-${bar.longitude}-${idx}`"
               class="p-3 rounded-lg border cursor-pointer transition"
               :class="
                 (bar.id ?? null) === selectedBarId
@@ -357,19 +398,22 @@ onMounted(() => {
               "
               @click="selectBar(bar)"
             >
+              <div v-if="(bar as any).recommendReason" class="text-xs text-gray-500 mt-1">
+                <span class="font-semibold text-purple-600">AI</span>
+                {{ (bar as any).recommendRank }}위 · {{ (bar as any).recommendReason }}
+              </div>
+
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <div class="font-semibold truncate">{{ bar.name }}</div>
                   <div class="text-xs text-gray-600 truncate">{{ bar.address }}</div>
                 </div>
               </div>
-              <!-- 필요하면 dto 필드에 맞춰 추가 표시 -->
-              <!-- <div class="text-xs text-gray-500 mt-1">카테고리: {{ bar.baseCategoryName }}</div> -->
             </li>
           </ul>
         </ScrollPanel>
 
-        <div v-if="selectedBar" class="p-3 border-t border-gray-100">
+        <div v-if="selectedBar" class="p-3 border-t border-gray-100 shrink-0 mt-auto bg-white">
           <div class="text-xs text-gray-600 mb-2">
             선택됨: <span class="font-semibold text-gray-800">{{ selectedBar.name }}</span>
           </div>
@@ -393,30 +437,32 @@ onMounted(() => {
           :initLayers="initLayers"
           @onLoad="onLoadMap"
         >
-          <NaverMarker
-            v-for="bar in bars"
-            :key="bar.id ?? `${bar.latitude}-${bar.longitude}`"
-            :latitude="bar.latitude"
-            :longitude="bar.longitude"
-            :htmlIcon="{ size: { width: 64, height: 64 }, anchor: { x: 32, y: 64 } }"
-            @click="selectBar(bar)"
-          >
-            <div class="relative flex items-end justify-center w-full h-full">
-              <img
-                :src="BarMarkerImg"
-                alt="marker"
-                class="block"
-                style="width: 64px; height: 64px"
-              />
+          <template v-if="renderMarkers">
+            <NaverMarker
+              v-for="bar in bars"
+              :key="bar.id ?? `${bar.latitude}-${bar.longitude}`"
+              :latitude="bar.latitude"
+              :longitude="bar.longitude"
+              :htmlIcon="{ size: { width: 64, height: 64 }, anchor: { x: 32, y: 64 } }"
+              @click="selectBar(bar)"
+            >
+              <div class="relative flex items-end justify-center w-full h-full">
+                <img
+                  :src="BarMarkerImg"
+                  alt="marker"
+                  class="block"
+                  style="width: 64px; height: 64px"
+                />
 
-              <div
-                v-if="(bar as any).recommendRank"
-                class="absolute bottom-2 right-2 text-xs px-2 py-0.5 rounded-full bg-black/70 text-white"
-              >
-                {{ (bar as any).recommendRank }}
+                <div
+                  v-if="(bar as any).recommendRank"
+                  class="absolute bottom-2 right-2 text-xs px-2 py-0.5 rounded-full bg-black/70 text-white"
+                >
+                  {{ (bar as any).recommendRank }}
+                </div>
               </div>
-            </div>
-          </NaverMarker>
+            </NaverMarker>
+          </template>
         </naver-map>
       </section>
     </div>
