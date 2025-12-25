@@ -180,16 +180,7 @@ const selectBar = (bar: BarListItemDto) => {
 
 // 리뷰 관련 핸들러
 const openReviewModal = () => {
-  if (!currentUserId.value) {
-    toast.add({
-      severity: 'warn',
-      summary: '로그인이 필요합니다',
-      detail: '로그인 후 리뷰를 작성할 수 있습니다.',
-      life: 3000,
-    })
-    router.push('/login')
-    return
-  }
+  // 서버에서 401로 처리하도록 클라이언트 체크 제거
   reviewModalMode.value = 'create'
   editingReview.value = null
   showReviewModal.value = true
