@@ -21,7 +21,19 @@ import Textarea from 'primevue/textarea'
 import { AIRecommendController } from '@/api/AiRecommendController'
 import type { GetRecommendedBarsResponseDto } from '@/api/responses/RecommendedBarItemResponseDto'
 
+// 리뷰 컴포넌트
+import TabView from 'primevue/tabview'
+import TabPanel from 'primevue/tabpanel'
+import ReviewSummary from '@/components/review/ReviewSummary.vue'
+import ReviewList from '@/components/review/ReviewList.vue'
+import ReviewModal from '@/components/review/ReviewModal.vue'
+import ReportModal from '@/components/review/ReportModal.vue'
+import BarMemo from '@/components/review/BarMemo.vue'
+import { useRouter, useRoute } from 'vue-router'
+
 const toast = useToast()
+const router = useRouter()
+const route = useRoute()
 
 const map = ref<any>(null)
 
@@ -36,6 +48,16 @@ const selectedBarId = ref<number | null>(null)
 
 const keyword = ref('')
 const isLoading = ref(false)
+
+// 리뷰 관련 상태
+const showReviewModal = ref(false)
+const showReportModal = ref(false)
+const reviewModalMode = ref<'create' | 'update'>('create')
+const editingReview = ref<any>(null)
+const reportingReviewId = ref<number | null>(null)
+const currentUserId = ref<number | undefined>(undefined) // 로그인 사용자 ID
+const reviewSummaryRef = ref<any>(null)
+const reviewListRef = ref<any>(null)
 
 // 플랜 관련 상태
 const showPlanDialog = ref(false)
@@ -154,6 +176,38 @@ const selectBar = (bar: BarListItemDto) => {
     // fallback
     mapOptions.value = { ...mapOptions.value, latitude: bar.latitude, longitude: bar.longitude }
   }
+}
+
+// 리뷰 관련 핸들러
+const openReviewModal = () => {
+  // 서버에서 401로 처리하도록 클라이언트 체크 제거
+  reviewModalMode.value = 'create'
+  editingReview.value = null
+  showReviewModal.value = true
+}
+
+const handleEditReview = (reviewId: number) => {
+  // TODO: 리뷰 상세 조회 후 editingReview에 설정
+  reviewModalMode.value = 'update'
+  showReviewModal.value = true
+}
+
+const handleReportReview = (reviewId: number) => {
+  if (!currentUserId.value) {
+    toast.add({
+      severity: 'warn',
+      summary: '로그인이 필요합니다',
+      life: 2500,
+    })
+    return
+  }
+  reportingReviewId.value = reviewId
+  showReportModal.value = true
+}
+
+const handleReviewSubmitted = () => {
+  reviewSummaryRef.value?.refresh()
+  reviewListRef.value?.refresh()
 }
 
 const selectedBar = computed(
@@ -427,6 +481,75 @@ onMounted(() => {
         </div>
       </aside>
 
+      <!-- 🆕 중앙 바 상세 패널 -->
+      <article
+        v-if="selectedBarId && selectedBar"
+        class="md:w-[400px] w-full shrink-0 border border-gray-200 rounded-lg bg-white flex flex-col overflow-hidden"
+      >
+        <!-- 헤더 -->
+        <div class="p-3 border-b border-gray-100 flex items-center justify-between shrink-0">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-lg truncate">{{ selectedBar.name }}</h3>
+            <p class="text-xs text-gray-500 truncate">{{ selectedBar.address }}</p>
+          </div>
+          <Button
+            icon="pi pi-times"
+            text
+            rounded
+            severity="secondary"
+            @click="selectedBarId = null"
+          />
+        </div>
+
+        <!-- TabView (정보 | 리뷰) -->
+        <TabView class="flex-1 min-h-0 overflow-hidden">
+          <TabPanel header="정보">
+            <div class="p-4 space-y-3">
+              <div>
+                <div class="text-sm font-medium text-gray-700">주소</div>
+                <div class="text-sm text-gray-600">{{ selectedBar.address }}</div>
+              </div>
+              <div v-if="selectedBar.baseCategoryName">
+                <div class="text-sm font-medium text-gray-700">카테고리</div>
+                <div class="text-sm text-gray-600">{{ selectedBar.baseCategoryName }}</div>
+              </div>
+              <div v-if="selectedBar.openInformation">
+                <div class="text-sm font-medium text-gray-700">영업 정보</div>
+                <div class="text-sm text-gray-600">{{ selectedBar.openInformation }}</div>
+              </div>
+            </div>
+          </TabPanel>
+
+          <TabPanel header="리뷰">
+            <div class="p-3 space-y-4 overflow-y-auto" style="max-height: calc(100vh - 280px)">
+              <!-- 리뷰 요약 -->
+              <ReviewSummary :barId="selectedBarId" ref="reviewSummaryRef" />
+
+              <!-- 리뷰 작성 버튼 -->
+              <Button
+                label="리뷰 작성"
+                icon="pi pi-pencil"
+                class="w-full"
+                @click="openReviewModal"
+              />
+
+              <!-- 내 메모 -->
+              <BarMemo v-if="currentUserId" :barId="selectedBarId" />
+
+              <!-- 리뷰 목록 -->
+              <ReviewList
+                :barId="selectedBarId"
+                :currentUserId="currentUserId"
+                ref="reviewListRef"
+                @refresh-summary="reviewSummaryRef?.refresh()"
+                @edit-review="handleEditReview"
+                @report-review="handleReportReview"
+              />
+            </div>
+          </TabPanel>
+        </TabView>
+      </article>
+
       <!-- 지도 -->
       <section
         class="flex-1 min-w-0 min-h-[55vh] md:min-h-0 border border-gray-200 rounded-lg overflow-hidden"
@@ -550,5 +673,21 @@ onMounted(() => {
         <Button label="AI 추천" icon="pi pi-star" :loading="aiLoading" @click="runAiRecommend" />
       </template>
     </Dialog>
+
+    <!-- 리뷰 작성/수정 모달 -->
+    <ReviewModal
+      v-model:visible="showReviewModal"
+      :mode="reviewModalMode"
+      :barId="selectedBarId"
+      :review="editingReview"
+      @submitted="handleReviewSubmitted"
+    />
+
+    <!-- 리뷰 신고 모달 -->
+    <ReportModal
+      v-model:visible="showReportModal"
+      :reviewId="reportingReviewId"
+      @reported="toast.add({ severity: 'success', summary: '신고 완료', life: 2000 })"
+    />
   </MainPageLayout>
 </template>
